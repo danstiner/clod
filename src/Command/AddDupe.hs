@@ -17,7 +17,7 @@ import Control.DeepSeq
 
 import Dupes
 import qualified Settings
-import Store.LevelDB as LevelDB
+import Store.Default as DataStore
 
 data CheckedPath = Canonical FilePath | NonExistant FilePath
 
@@ -40,7 +40,7 @@ parser = Options
 run :: Options -> IO ()
 run opt = do
   appDir <- Settings.getAppDir
-  let store = LevelDB.createStore (appDir </> "leveldb")
+  let store = DataStore.createStore (appDir </> "leveldb")
 
   processPaths opt store =<< mapM checkPath =<< getPaths
 
@@ -55,7 +55,7 @@ processPaths opt store checkedPaths = do
   toAdd <- mapM keyPair $ catCanonicals checkedPaths
   let toRemove = catNonExistants checkedPaths
   
-  LevelDB.runDupes store $ do
+  DataStore.runDupes store $ do
     addAll $ catMaybes toAdd
     removeAll toRemove
 

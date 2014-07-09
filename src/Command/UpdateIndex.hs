@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 module Command.UpdateIndex (
 	Options
   , parserInfo
@@ -10,7 +12,7 @@ import System.Directory (doesFileExist)
 import System.FilePath ( (</>) )
 
 import qualified Settings
-import Store.LevelDB as LevelDB
+import Store.Default as DataStore
 import Index
 import qualified Blob
 import Text.Read (step, readPrec)
@@ -94,8 +96,10 @@ runCacheInfo :: CacheInfoParams -> IO ()
 runCacheInfo NoCacheInfoParams = do return ()
 runCacheInfo (CacheInfoParams _ hash path) = do
   appDir <- Settings.getAppDir
-  let store = LevelDB.createStore (appDir </> "leveldb")
-  LevelDB.runLevelDBIndex (set path hash) store
+  let store = DataStore.createStore (appDir </> "leveldb")
+#ifdef WITH_LEVELDB
+  DataStore.runLevelDBIndex (set path hash) store
+#endif
   return ()
 
 updateInfo :: FilePath -> IO ()
@@ -106,8 +110,10 @@ updateInfo path = do
     then do
       appDir <- Settings.getAppDir
       bytes <- B.readFile path
-      let store = LevelDB.createStore (appDir </> "leveldb")
-      LevelDB.runLevelDBIndex (updateHash path bytes) store
+      let store = DataStore.createStore (appDir </> "leveldb")
+#ifdef WITH_LEVELDB
+      DataStore.runLevelDBIndex (updateHash path bytes) store
+#endif
       return ()
     else return ()
 

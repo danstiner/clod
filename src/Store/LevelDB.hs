@@ -1,8 +1,11 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE CPP #-}
 
+#ifdef WITH_LEVELDB
 module Store.LevelDB (
+
     createStore
   , Store
   , runLevelDBIndex
@@ -118,3 +121,6 @@ toLevelKey = encodeStrict
 encodeStrict :: (Binary.Binary a) => a -> Level.Key
 encodeStrict = L.toStrict . Binary.encode
 
+#else
+module Store.LevelDB () where
+#endif

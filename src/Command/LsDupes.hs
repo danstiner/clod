@@ -11,7 +11,7 @@ import System.FilePath ( (</>) )
 import Dupes
 import qualified Settings
 import qualified Telemetry
-import Store.LevelDB as LevelDB
+import Store.Default as DataStore
 
 data Options = Options
   { optShowDupesOnly :: Bool }
@@ -31,8 +31,8 @@ run opt = do
 
   appDir <- Settings.getAppDir
 
-  let store = LevelDB.createStore (appDir </> "leveldb")
-  fileSets <- LevelDB.runDupes store (ls opt)
+  let store = DataStore.createStore (appDir </> "leveldb")
+  fileSets <- DataStore.runDupes store (ls opt)
   let fileLines = map (foldr1 combine) fileSets
   mapM_ Prelude.putStrLn fileLines
 

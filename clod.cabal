@@ -14,6 +14,9 @@ build-type:          Simple
 cabal-version:       >=1.9.2
 tested-with:         GHC==7.6.3, GHC==7.8.2
 
+Flag LevelDB
+  Description: Enable support for LevelDB store
+  Default:     False
 executable clod
   Hs-Source-Dirs:      src
   Main-Is:             Main.hs
@@ -30,7 +33,6 @@ executable clod
                      , digest
                      , directory
                      , filepath
-                     , higher-leveldb >= 0.1.0.3
                      , hslogger
                      , http-conduit
                      , MissingH
@@ -41,7 +43,11 @@ executable clod
                      , text
                      , transformers
 
-Test-suite testsuite
+  if flag(LevelDB)
+    Build-Depends: higher-leveldb >= 0.1.0.3
+    CPP-Options: -DWITH_LEVELDBs
+
+Test-suite unittests
   Type:                exitcode-stdio-1.0
   Hs-Source-Dirs:      src test
   Main-Is:             TestSuite.hs
@@ -58,7 +64,6 @@ Test-suite testsuite
                      , deepseq-generics
                      , directory
                      , filepath
-                     , higher-leveldb >= 0.1.0.3
                      , hslogger
                      , http-conduit
                      , MissingH

@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 module Command.LsFiles (
 	Options
   , parserInfo
@@ -9,7 +11,9 @@ import Data.ByteString
 import Options.Applicative
 import qualified Data.ByteString.Char8 as C
 import qualified Data.ByteString.Lazy as L
+#ifdef WITH_LEVELDB
 import qualified Database.LevelDB.Higher as Level
+#endif
 import System.FilePath ( (</>) )
 
 import qualified Blob
@@ -36,17 +40,20 @@ run :: Options -> IO ()
 run _ = do
   appDir <- Settings.getAppDir
   let path = appDir </> "leveldb"
-  
+
+#ifdef WITH_LEVELDB
   items <- Level.runLevelDB path Level.def (Level.def, Level.def) keySpace $ do
     Level.scan (C.pack ("index/")) (Level.queryItems)
 
   mapM_ (Prelude.putStrLn . showItem) items
+#endif
 
   return ()
 
-
+#ifdef WITH_LEVELDB
 showItem :: Level.Item -> String
 showItem item =
   (C.unpack $ fst item)
   ++ " " ++
   (Blob.toHexString $ Binary.decode $ L.fromStrict $ snd item)
+#endif
